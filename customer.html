@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>お客様カルテ（視覚化）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f7f4;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .entry {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .entry h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 4px;
+    }
+    .label {
+      font-weight: bold;
+      color: #555;
+    }
+    .tags {
+      margin: 4px 0;
+      padding: 2px 6px;
+      background: #e8e2d9;
+      border-radius: 4px;
+      display: inline-block;
+      font-size: 14px;
+      margin-right: 5px;
+    }
+    .stars {
+      color: #e09015;
+      font-weight: bold;
+    }
+    .section {
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<h2 id="customerName">お客様カルテ</h2>
+<div id="history"></div>
+
+<script>
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+function formatStars(score) {
+  const full = "★".repeat(score);
+  const empty = "☆".repeat(10 - score);
+  return `<span class="stars">${full}${empty}</span> (${score}/10)`;
+}
+
+function formatParts(parts) {
+  return parts.map(p => `<span class="tags">${p}</span>`).join(" ");
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("ja-JP", { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+
+function loadCustomerData() {
+  const targetName = decodeURIComponent(getQueryParam("id"));
+  document.getElementById("customerName").textContent = `${targetName} 様のカルテ`;
+
+  const historyContainer = document.getElementById("history");
+  let memos = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key.startsWith("memo_")) continue;
+    const memo = JSON.parse(localStorage.getItem(key));
+    if (memo.name === targetName) {
+      memos.push(memo);
+    }
+  }
+
+  memos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  if (memos.length === 0) {
+    historyContainer.innerHTML = "<p>来店履歴が見つかりませんでした。</p>";
+    return;
+  }
+
+  memos.forEach(memo => {
+    const div = document.createElement("div");
+    div.className = "entry";
+    div.innerHTML = `
+      <h3>${formatDate(memo.timestamp)}</h3>
+      <div class="section"><span class="label">コース：</span>${memo.course}</div>
+      <div class="section"><span class="label">疲労部位：</span>${formatParts(memo.parts || [])}</div>
+      <div class="section"><span class="label">コリの強さ：</span>${formatStars(Number(memo.stiffness))}</div>
+      <div class="section"><span class="label">ご要望：</span>${memo.request || "－"}</div>
+      <div class="section"><span class="label">施術後の反応：</span>${memo.reaction || "－"}</div>
+      <div class="section"><span class="label">メモ：</span>${memo.notes || "－"}</div>
+    `;
+    historyContainer.appendChild(div);
+  });
+}
+
+window.onload = loadCustomerData;
+</script>
+
+</body>
+</html>
