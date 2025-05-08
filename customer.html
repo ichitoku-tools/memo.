@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>お客様カルテ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f7f4;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .entry {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      padding: 10px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<h2 id="customerName">お客様カルテ</h2>
+<div id="history"></div>
+
+<script>
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+function loadCustomerData() {
+  const targetName = decodeURIComponent(getQueryParam("id"));
+  document.getElementById("customerName").textContent = `${targetName} 様のカルテ`;
+
+  const historyContainer = document.getElementById("history");
+  let memos = [];
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key.startsWith("memo_")) continue;
+    const memo = JSON.parse(localStorage.getItem(key));
+    if (memo.name === targetName) {
+      memos.push(memo);
+    }
+  }
+
+  // 最新順にソート
+  memos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  if (memos.length === 0) {
+    historyContainer.innerHTML = "<p>来店履歴が見つかりませんでした。</p>";
+    return;
+  }
+
+  memos.forEach(memo => {
+    const div = document.createElement("div");
+    div.className = "entry";
+    div.textContent = JSON.stringify(memo, null, 2);
+    historyContainer.appendChild(div);
+  });
+}
+
+window.onload = loadCustomerData;
+</script>
+
+</body>
+</html>

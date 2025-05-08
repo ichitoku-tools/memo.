@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>お客様一覧（名前＋日付検索）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f7f4;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+    }
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 6px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    ul {
+      padding-left: 0;
+    }
+    li {
+      list-style: none;
+      padding: 10px;
+      background: #fff;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    a {
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h2>お客様一覧</h2>
+
+<input type="text" id="searchName" placeholder="名前で検索" oninput="filterList()">
+<input type="date" id="searchDate" onchange="filterList()">
+
+<ul id="customerList"></ul>
+
+<script>
+function filterList() {
+  const nameQuery = document.getElementById('searchName').value.toLowerCase();
+  const dateQuery = document.getElementById('searchDate').value;
+  const ul = document.getElementById('customerList');
+  ul.innerHTML = '';
+
+  let filteredNames = new Set();
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key.startsWith('memo_')) continue;
+
+    const memo = JSON.parse(localStorage.getItem(key));
+    const name = memo.name || '';
+    const date = (memo.timestamp || '').substring(0, 10); // YYYY-MM-DD
+
+    const matchesName = name.toLowerCase().includes(nameQuery);
+    const matchesDate = !dateQuery || date === dateQuery;
+
+    if (matchesName && matchesDate) {
+      filteredNames.add(name);
+    }
+  }
+
+  const sortedNames = Array.from(filteredNames).sort((a, b) => a.localeCompare(b, 'ja'));
+
+  sortedNames.forEach(name => {
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `customer.html?id=${encodeURIComponent(name)}`;
+    link.textContent = name;
+    li.appendChild(link);
+    ul.appendChild(li);
+  });
+}
+
+window.onload = filterList;
+</script>
+
+</body>
+</html>
