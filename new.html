@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>新規メモ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f7f4;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin: 10px 0 4px;
+      font-weight: bold;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      background-color: #8e7d6c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>新規メモ作成</h2>
+
+<label>お名前</label>
+<input type="text" id="name">
+
+<label>コース名</label>
+<input type="text" id="course">
+
+<label>疲れている部位（複数可）</label>
+<select id="parts" multiple>
+  <option>首</option>
+  <option>肩</option>
+  <option>背中</option>
+  <option>腰</option>
+  <option>足</option>
+</select>
+
+<label>コリの強さ</label>
+<div class="slider-label">
+  <span>弱</span>
+  <span>強</span>
+</div>
+<input type="range" id="stiffness" min="1" max="10">
+
+<label>施術の要望</label>
+<input type="text" id="request">
+
+<label>施術後の感想・反応</label>
+<textarea id="reaction"></textarea>
+
+<label>自由メモ</label>
+<textarea id="notes"></textarea>
+
+<button onclick="saveData()">保存する</button>
+
+<script>
+function saveData() {
+  const data = {
+    name: document.getElementById('name').value,
+    course: document.getElementById('course').value,
+    parts: Array.from(document.getElementById('parts').selectedOptions).map(o => o.value),
+    stiffness: document.getElementById('stiffness').value,
+    request: document.getElementById('request').value,
+    reaction: document.getElementById('reaction').value,
+    notes: document.getElementById('notes').value,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem('memo_' + data.timestamp, JSON.stringify(data, null, 2));
+  alert("保存しました！");
+}
+</script>
+
+</body>
+</html>
