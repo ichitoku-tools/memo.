@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>お客様カルテ</title>
+  <style>
+    body{font-family:'Noto Sans JP',sans-serif;background:#fdfaf6;margin:0;padding:20px;}
+    h1{font-size:1.4rem;margin-top:0;text-align:center;}
+    a.back{display:inline-block;margin-bottom:16px;color:#7f5a39;text-decoration:none;}
+    .entry{border-bottom:1px solid #ddd;padding:12px 0;}
+    .entry h3{margin:0 0 4px;font-size:1.1rem;}
+    .entry p{margin:2px 0;font-size:.9rem;}
+    .edit{margin-top:6px;font-size:.8rem;}
+  </style>
+</head>
+<body>
+  <h1>お客様カルテ</h1>
+  <a href="index.html" class="back">← トップに戻る</a>
+
+  <div id="history"></div>
+
+  <script>
+  /* ===== ▼ ダミーデータ１件だけ投入（本番では削除） ▼ ===== */
+  const sample = [{
+    id: '20250509-1',
+    timestamp: Date.now(),
+    course: 'もみほぐし 60分',
+    parts: ['首','肩'],
+    stiffness: 3,
+    request: '首を重点的に',
+    reaction: 'とても軽くなった',
+    notes: 'PC作業が多い'
+  }];
+  localStorage.setItem('memos', JSON.stringify(sample));
+  /* ===== ▲ ダミーここまで ▲ ===== */
+
+  const historyContainer = document.getElementById('history');
+
+  const formatDate   = ms   => {const d=new Date(ms);return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;}
+  const formatParts  = arr  => arr.length ? arr.join('・') : 'ー';
+  const formatStars  = n    => '★'.repeat(n)+'☆'.repeat(5-n);
+
+  function renderHistory(){
+    historyContainer.innerHTML = '';
+    const memos = JSON.parse(localStorage.getItem('memos') || '[]');
+
+    memos.forEach(memo => {
+      const div = document.createElement('div');
+      div.className = 'entry';
+      div.innerHTML = `
+        <h3>${formatDate(memo.timestamp)}</h3>
+        <p>コース：${memo.course}</p>
+        <p>疲労部位：${formatParts(memo.parts || [])}</p>
+        <p>コリの強さ：${formatStars(Number(memo.stiffness))}</p>
+        <p>ご要望：${memo.request || 'ー'}</p>
+        <p>施術後の反応：${memo.reaction || 'ー'}</p>
+        <p>メモ：${memo.notes || 'ー'}</p>
+        <button class="edit" data-id="${memo.id}">編集する</button>
+      `;
+      historyContainer.appendChild(div);   /* ← back-tick の外！ */
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', renderHistory);
+  </script>
+</body>
+</html>
